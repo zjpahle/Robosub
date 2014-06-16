@@ -4,15 +4,19 @@ import time
 import datetime
 import log
 
-######################################
-#Desired changes:
-#make variables global
-#
-#
-#
-######################################
+
+####################################################
+#global sensor data
+#errors
 data_err = 0
+
+#theta data
 magdata = [0,0,0]
+gyrodata = [0,0,0]
+gyro_old = [0,0,0]
+theta = [0,0,0]
+
+#position data
 acceldata = [0,0,0]
 accel_old = [0,0,0]
 accel_delta = [0,0,0]
@@ -20,10 +24,10 @@ vel = [0,0,0]
 vel_old = [0,0,0]
 vel_delta = [0,0,0]
 position = [0,0,0]
-
+####################################################
 def serial_init():
 	global ser2
-	IMUdevice = '/dev/ttyUSB0' #IMU
+	IMUdevice = '/dev/ttyUSB1' #IMU
 	ser2 = serial.Serial(IMUdevice, 115200, timeout=1)
 
 def IMU_init():   # sda-->a4	scl-->a5
@@ -40,6 +44,24 @@ def IMU_init():   # sda-->a4	scl-->a5
 
 def IMU_get_theta():
 	global data_err
+	global gyrodata
+	global gyro_old
+	global theta
+	
+	rawdata = ser2.readline()
+	data = rawdata.strip('\r\n').split(':') #reads in data, delimits around ':'
+	try:
+		gyrodata = [float(data[x]) for x in [3,4,5]] #grab the first 3 values (magnetometer)
+	except(ValueError):
+		data_err = data_err+1
+		log.store('Error Count = '+str(data_err))
+	theta = [theta[x] + (gyro_old[x]-gyrodata[x]) for x in range(0,3)]
+	gyro_old = gyrodata
+	log.store(theta)
+	#return magdata
+'''
+def IMU_get_theta():
+	global data_err
 	global magdata
 	
 	rawdata = ser2.readline()
@@ -51,6 +73,24 @@ def IMU_get_theta():
 		log.store('Error Count = '+str(data_err))
 	log.store(magdata)
 	return magdata
+'''
+
+def IMU_get_pressure():
+	global data_err
+	global pressuredata
+	
+	rawdata = ser2.readline()
+	data = rawdata.strip('\r\n').split(':') #reads in data, delimits around ':'
+	try:
+		pressuredata = 5./1024.*float(data[6]) #grab the first 3 values (magnetometer)
+	except(ValueError):
+		data_err = data_err+1
+		log.store('Error Count = '+str(data_err))
+	except(IndexError):
+		data_err = data_err+1
+		log.store('Error Count = '+str(data_err))
+	log.store('pressure = '+str(pressuredata))
+	return pressuredata
 
 def IMU_get_accel(logging):
 	global data_err
@@ -66,20 +106,6 @@ def IMU_get_accel(logging):
 		log.store('Error Count = '+str(data_err))
 	if (logging is True): log.store(acceldata)
 	return acceldata
-
-def IMU_get_pressure():
-	global data_err
-	global pressuredata
-	
-	rawdata = ser2.readline()
-	data = rawdata.strip('\r\n').split(':') #reads in data, delimits around ':'
-	try:
-		pressuredata = float(data[6]) #grab the first 3 values (magnetometer)
-	except(ValueError):
-		data_err = data_err+1
-		log.store('Error Count = '+str(data_err))
-	log.store('pressure = '+str(pressuredata))
-	return pressuredata
 
 def IMU_get_position(logging):
 	global data_err

@@ -1,5 +1,5 @@
 import datetime
-#import vision
+import vision
 
 name = 'error-notafile'
 
@@ -16,9 +16,9 @@ def store(data):
 def video():
 	print 'This is hard! I can\'t do it.'
 
-#def picture():
-#	vision.init()
-#	vision.picture()
+def picture():
+	vision.init()
+	vision.picture()
 
 
 #picture()
