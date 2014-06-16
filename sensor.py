@@ -4,6 +4,13 @@ import time
 import datetime
 import log
 
+######################################
+#Desired changes:
+#make variables global
+#
+#
+#
+######################################
 data_err = 0
 magdata = [0,0,0]
 acceldata = [0,0,0]
