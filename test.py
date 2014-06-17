@@ -62,4 +62,7 @@ def jasons_test():
 	log.picture()
 	for x in range(0,7):
 		robot.motor.power(x,0,log_motor)
-		log.picture()
+		log.picture
+
+def test()
+    print 'IT WORKS!'
