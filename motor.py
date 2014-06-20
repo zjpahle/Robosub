@@ -5,7 +5,7 @@ import log
 
 def serial_init():
 	global ser
-	mcdevice  = '/dev/ttyUSB1'
+	mcdevice  = '/dev/ttyUSB0'
 	ser = serial.Serial(mcdevice, 115200, timeout=1)
 	log.store('initializing motor serial device:'+ str(mcdevice))
 

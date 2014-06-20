@@ -31,7 +31,7 @@ position = [0,0,0]
 ####################################################
 def serial_init():
 	global ser2
-	IMUdevice = '/dev/ttyUSB0' #IMU
+	IMUdevice = '/dev/ttyUSB1' #IMU
 	ser2 = serial.Serial(IMUdevice, 115200, timeout=1)
 
 def IMU_init():		# sda-->a4	scl-->a5
@@ -224,7 +224,7 @@ def integrate(logging):
 	accel_old = acceldata
 	vel_old = vel
 	return vel, acceldata
-
+'''
 serial_init()
 IMU_init()
 timer = time.time()
@@ -235,3 +235,4 @@ while 1:
 	print [round(test[x],3)for x in range(0,3)], [round(acceldata[x],3)for x in range(0,3)]
 
 	#print [round(vel[x],3)for x in range(0,3)], [round(position[x],3) for x in range(0,3)]
+'''

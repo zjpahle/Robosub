@@ -1,9 +1,12 @@
 import numpy as np
 import cv2
 import datetime
+from subprocess import call
 
 def init_video():
 	global cap
+	call(["v4l2-ctl", "--set-fmt-video=width=160,height=120,pixelformat=MJPG"])
+	call(["v4l2-ctl", "--get-fmt-video"])
 	cap = cv2.VideoCapture(0)
 
 def video():
