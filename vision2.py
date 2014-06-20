@@ -5,7 +5,11 @@ from subprocess import call
 
 def init_video():
 	global cap
+<<<<<<< HEAD
 	call(["v4l2-ctl", "--set-fmt-video=width=640,height=480,pixelformat=MJPG"])
+=======
+	call(["v4l2-ctl", "--set-fmt-video=width=160,height=120,pixelformat=MJPG"])
+>>>>>>> 65f6e291d3c82a1d82b4831eb0c5d7ee9d8751f9
 	call(["v4l2-ctl", "--get-fmt-video"])
 	cap = cv2.VideoCapture(0)
 
