@@ -5,22 +5,18 @@ from subprocess import call
 
 def init_video():
 	global cap
-<<<<<<< HEAD
-	call(["v4l2-ctl", "--set-fmt-video=width=640,height=480,pixelformat=MJPG"])
-=======
-	call(["v4l2-ctl", "--set-fmt-video=width=160,height=120,pixelformat=MJPG"])
->>>>>>> 65f6e291d3c82a1d82b4831eb0c5d7ee9d8751f9
-	call(["v4l2-ctl", "--get-fmt-video"])
 	cap = cv2.VideoCapture(0)
-
+	'''
+	call(["v4l2-ctl", "--set-fmt-video=width=640,height=480,pixelformat=MJPG"])
+	call(["v4l2-ctl", "--set-fmt-video=width=160,height=120,pixelformat=MJPG"])
+	'''
 def video():
 	logname = 'video'+str(datetime.datetime.now().strftime('%H%M%S'))+'.avi'
 	out = cv2.VideoWriter('./logs/videos/'+logname,1145656920, 20.0, (640,480))
 	while(cap.isOpened()):
 		ret, frame = cap.read()
 		if ret==True:
-			frame = cv2.flip(frame,0)
-			#out.write(frame)
+			out.write(frame)
 			cv2.imshow('frame',frame)
 			if cv2.waitKey(1) & 0xFF == ord('q'):
 				break
@@ -37,8 +33,11 @@ def test_stream():
 			flow = cv2.cvtColor(flow, cv2.COLOR_BGR2HSV)
 
 			#threshold around color value (orange)
-			orange_min = np.array([5, 100, 100], np.uint8)
-			orange_max = np.array([10, 255, 255], np.uint8)
+			#orange_min = np.array([5, 100, 100], np.uint8)
+			#orange_max = np.array([10, 255, 255], np.uint8)
+			orange_min = np.array([0, 100, 0], np.uint8)
+			orange_max = np.array([150, 255, 50], np.uint8)
+
 			flow = cv2.inRange(flow, orange_min, orange_max)
 
 			#open and then close image to reduce noise
@@ -48,39 +47,27 @@ def test_stream():
 
 			#finds orange blobs, passes two largest to be drawn on original
 			contour_flow = flow
+			#print type(contour_flow)
+			#print type(cv2.findContours)
 			contours = cv2.findContours(contour_flow, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[0]
 			cv2.drawContours(frame, contours, len(contours)-1, (0,255,0), 1)
 			cv2.drawContours(frame, contours, len(contours)-2, (0,255,0), 1)
 			
-			'''
-			largest_contour = None
-			for idx, contour in enumerate(contours):
-				largest_contour = contour
-				second_largest = contour-2
-			'''
-			
-		#	for idx, new_contour in enumerate(contours)
-		#	print type(new_contour)
-			
-			'''
 			#find the center of the two blobs
-			if largest_contour is not None:
-				print 'largest: ' + str(largest_contour)
-				moment = cv2.moments(largest_contour)
+			if (len(contours)>1):
+				moment = cv2.moments(contours[-1])
 				if (moment['m00'] != 0):
 					centroid_x = int(moment['m10']/moment['m00'])
 					centroid_y = int(moment['m01']/moment['m00'])
 					#print centroid_x, centroid_y
 					cv2.circle(frame,(centroid_x,centroid_y), 5, (0,255,0), 1)
 
-				print 'second largest: ' + str(second_largest)
-				moment = cv2.moments(second_largest)
+				moment = cv2.moments(contours[-2])
 				if (moment['m00'] != 0):
 					centroid_x = int(moment['m10']/moment['m00'])
 					centroid_y = int(moment['m01']/moment['m00'])
 					#print centroid_x, centroid_y
 					cv2.circle(frame,(centroid_x,centroid_y), 5, (0,255,0), 1)
-			'''
 
 			#epsilon = 0.1*cv2.arcLength(cnt,True)
 			#approx = cv2.approxPolyDP(cnt,epsilon,True)	
@@ -96,4 +83,5 @@ def test_stream():
 	cv2.destroyAllWindows()
 
 init_video()
+#video()
 test_stream()
