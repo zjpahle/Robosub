@@ -11,6 +11,7 @@ import robot
 import time
 import test
 import log
+import vision2
 
 log_motor = True
 
@@ -19,12 +20,27 @@ robot.motor.serial_init()
 robot.sensor.serial_init()
 robot.sensor.IMU_init()
 
+vision2.video
+'''
 #time.sleep(60)
 init_time = time.time()
 current_time = time.time()-init_time
-while(current_time<=(5*60)):
-	robot.sensor.IMU_get_theta()
+while(current_time<=(10)):
+	robot.sensor.IMU_get_data()
 	current_time = time.time()-init_time
-
-#test.pressuretest()
-
+init_time = time.time()
+robot.motor.power(3,100, True)
+robot.motor.power(4,100, True)
+while(current_time<=(10)):
+	robot.sensor.IMU_get_data()
+	current_time = time.time()-init_time
+init_time = time.time()
+current_time = 0
+robot.motor.power(1,-100, True)
+robot.motor.power(2,-100, True)
+while(current_time<=(10)):
+	robot.sensor.IMU_get_data()
+	current_time = time.time()-init_time
+init_time = time.time()
+current_time = 0
+'''
