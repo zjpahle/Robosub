@@ -31,7 +31,7 @@ position = [0,0,0]
 ####################################################
 def serial_init():
 	global ser2
-	IMUdevice = '/dev/ttyUSB1' #IMU
+	IMUdevice = '/dev/ttyUSB0' #IMU
 	ser2 = serial.Serial(IMUdevice, 115200, timeout=1)
 
 def IMU_init():		# sda-->a4	scl-->a5
@@ -196,7 +196,8 @@ def integrate(logging):
 	global vel
 	global vel_old
 	global position
-	global timer_delta
+#	global timer_delta
+	global data_err
 
 
 	rawdata = ser2.readline()
@@ -204,35 +205,44 @@ def integrate(logging):
 	
 	try:
 		#1632 is the conversion from miles/sec^2 to meters/sec^2
-		acceldata = [float(data[x])/1632 for x in [6,7,8]] #grab the second 3 value (Accelerometers)
+		acceldata = [float(data[x])/1632 for x in [6,7,8]] #grab the third 3 value (Accelerometers)
 		# divide by 1632
 	except(ValueError):
 		data_err = data_err+1
 		log.store('Error Count = '+str(data_err))
+	except(IndexError):
+		data_err = data_err+1
+		log.store('Error Count = '+str(data_err))
+
 	if (logging is True): log.store(acceldata)
 
+	timer = time.time()
 	timer_delta = timer-timer_old
-	accel_delta = [acceldata[x] - accel_old[x] for x in range(0,3)]
-	#accel_delta=[round(accel_delta[x],3) for x in range(0,3)]
-	vel = [vel[x] + (accel_delta[x] * timer_delta) for x in range(0,3)]
-	vel_delta = [vel[x] - vel_old[x] for x in range(0,3)]
-	#vel_delta =[round(vel_delta[x],3) for x in range(0,3)]
-	position = [position[x] + (vel_delta[x] * timer_delta) for x in range(0,3)]
+	#acceldata[2] =acceldata[2]-9.806 
+	vel = [vel[x] + (acceldata[x] * timer_delta) for x in range(0,3)]
+	position = [position[x] + (vel[x] * timer_delta) for x in range(0,3)]
 
 	timer_old = timer
-	timer = time.time()
-	accel_old = acceldata
-	vel_old = vel
-	return vel, acceldata
-'''
+	return acceldata, vel, position, timer_delta
+
 serial_init()
 IMU_init()
-timer = time.time()
 timer_old =  time.time()
+timer = time.time()
+
 while 1:
-	test, timer_delta= integrate(False)
-	global position_old
-	print [round(test[x],3)for x in range(0,3)], [round(acceldata[x],3)for x in range(0,3)]
+	acceldata, vel, position, timer_delta = integrate(False)
+	print [round(acceldata[x],3)for x in range(0,3)], [round(vel[x],3)for x in range(0,3)],[round(position[x],3)for x in range(0,3)], round(timer_delta,5)
 
 	#print [round(vel[x],3)for x in range(0,3)], [round(position[x],3) for x in range(0,3)]
-'''
+
+def IMU_get_data():
+	
+	rawdata = ser2.readline()
+	data = rawdata.strip('\r\n').split(':') #reads in data, delimits around ':'
+	try:
+		floatdata = [float(data[x]) for x in range(0,len(data)) ] #grab the first 3 values (magnetometer)
+		log.store(floatdata)
+	except(ValueError):
+		data_err = data_err+1
+		log.store('Error Count = '+str(data_err))
