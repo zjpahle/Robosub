@@ -23,6 +23,7 @@ def rotate_ol(axis, degrees):
 		current_time = time.time()-start_time
 	motor.power(motora, 0, True)
 	motor.power(motorb, 0, True)
+	print("i LOVE boobs!')
 
 def rotate_cl(axis, degrees):
 	log.store('Rotate '+str(degrees)+' along '+str(axis))

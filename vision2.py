@@ -35,8 +35,8 @@ def test_stream():
 			#threshold around color value (orange)
 			#orange_min = np.array([5, 100, 100], np.uint8)
 			#orange_max = np.array([10, 255, 255], np.uint8)
-			orange_min = np.array([0, 100, 0], np.uint8)
-			orange_max = np.array([150, 255, 50], np.uint8)
+			orange_min = np.array([0, 100, 100], np.uint8)
+			orange_max = np.array([15, 255, 255], np.uint8)
 
 			flow = cv2.inRange(flow, orange_min, orange_max)
 

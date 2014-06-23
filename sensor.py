@@ -4,6 +4,7 @@ import time
 import datetime
 import log
 import math
+import numpy
 
 ####################################################
 #global sensor data
@@ -16,25 +17,30 @@ timer_old = time.time()
 
 #theta data
 magdata = [0,0,0]
+magset = [0,0,0]
 gyrodata = [0,0,0]
-gyro_old = [0,0,0]
 theta = [0,0,0]
+gyrotheta = [0,0,0]
+gyrodata = [0,0,0]
 
 #position data
 acceldata = [0,0,0]
-accel_old = [0,0,0]
-accel_delta = [0,0,0]
 vel = [0,0,0]
-vel_old = [0,0,0]
-vel_delta = [0,0,0]
 position = [0,0,0]
 ####################################################
+
 def serial_init():
 	global ser2
+	
 	IMUdevice = '/dev/ttyUSB0' #IMU
 	ser2 = serial.Serial(IMUdevice, 115200, timeout=1)
 
 def IMU_init():		# sda-->a4	scl-->a5
+	global magdata
+	global magset
+	global acceldata
+	global gyrotheta
+
 	log.store('initializing IMU')
 	rawdata = ser2.readline()
 	#check to see if data coming in is numerical
@@ -44,40 +50,12 @@ def IMU_init():		# sda-->a4	scl-->a5
 		log.store(rawdata[0])
 		if rawdata[0].strip('-').isdigit(): #check to see if data is numerical
 			trooth = False
-			log.store('its a number!')
-
-def IMU_get_theta():
-	global data_err
-	global gyrodata
-	global gyro_old
-	global theta
-	
-	rawdata = ser2.readline()
-	data = rawdata.strip('\r\n').split(':') #reads in data, delimits around ':'
-	try:
-		gyrodata = [float(data[x]) for x in [3,4,5]] #grab the first 3 values (magnetometer)
-	except(ValueError):
-		data_err = data_err+1
-		log.store('Error Count = '+str(data_err))
-	theta = [theta[x] + (gyro_old[x]-gyrodata[x]) for x in range(0,3)]
-	gyro_old = gyrodata
-	log.store(theta)
-	#return magdata
-'''
-def IMU_get_theta():
-	global data_err
-	global magdata
-	
-	rawdata = ser2.readline()
-	data = rawdata.strip('\r\n').split(':') #reads in data, delimits around ':'
-	try:
-		magdata = [float(data[x]) for x in [0,1,2]] #grab the first 3 values (magnetometer)
-	except(ValueError):
-		data_err = data_err+1
-		log.store('Error Count = '+str(data_err))
-	log.store(magdata)
-	return magdata
-'''
+			log.store('Successfully Initialized')
+	for x in range(0,300):	
+		IMU_get_data(False)
+		print gyrotheta
+	gyrotheta = [0,0,0]
+	magset = magdata	
 
 def IMU_get_pressure():
 	global data_err
@@ -96,117 +74,40 @@ def IMU_get_pressure():
 	log.store('pressure = '+str(pressuredata))
 	return pressuredata
 
-def IMU_get_accel(logging):
-	global data_err
-	global magdata
-	rawdata = ser2.readline()
-	data = rawdata.strip('\r\n').split(':') #reads in data, delimits around ':'
-	global acceldata
-	try:
-		#1632 is the conversion from miles/sec^2 to meters/sec^2
-		acceldata = [float(data[x])/1632 for x in [3,4,5]] #grab the second 3 value (Accelerometers)
-	except(ValueError):
-		data_err = data_err+1
-		log.store('Error Count = '+str(data_err))
-	if (logging is True): log.store(acceldata)
-	return acceldata
-
-def IMU_get_position(logging):
-	global data_err
-	global accel_total
-	global accel_old
-	global accel_delta
-	global acceldata
-	global vel
-	global vel_old
-	global vel_delta
-	global position
-	global time_delta
-
-	rawdata = ser2.readline()
-	data = rawdata.strip('\r\n').split(':') #reads in data, delimits around ':'
-
-	try:
-		#1632 is the conversion from miles/sec^2 to meters/sec^2
-		acceldata = [float(data[x])/1632 for x in [3,4,5]] #grab the second 3 value (Accelerometers)
-	except(ValueError):
-		data_err = data_err+1
-		log.store('Error Count = '+str(data_err))
-	if (logging is True): log.store(acceldata)
-	
-
-	
-	'''
-	accel_delta[0] = accel_old[0]-acceldata[0]
-	accel_old[0] = acceldata[0]
-	vel[0] = vel[0] + accel_delta[0]
-
-	vel_delta[0] = vel_old[0]-vel[0]
-	vel_old[0] = vel[0]
-	position[0] = position[0] + vel_delta[0]
-
-
-	accel_delta = [accel_old[x]-acceldata[x] for x in range(0,3)]
-	accel_old = acceldata
-	vel = [vel[x] + accel_delta[x] for x in range(0,3)]
-
-	vel_delta = [vel_old[x]-vel[x] for x in range(0,3)]
-	vel_old = vel
-	position = [vel[x] + vel_delta[x] for x in range(0,3)]
-
-	'''	
-	return position
-'''
-def whateverYouWant(logging):
-	
-	global acceldata
-	global magdata
-	
-	rawdata=ser2.readline()
-	data = rawdata.strop('\r\n').split(':')
-	
-	try:
-	acceldata = [float(data[x])/1632 for x in [6,7,8]]
-	magdata = [float(data[x]) for x in [0,1,2]
-	except(ValueError):
-		data_err = data_err+1
-		log.store('Error Count = '+str(data_err))
-	if (logging is True): log.store(acceldata)
-	
-	magdataRad=math.pi/180*[magdata[x] for x in range(0,3)]
-	phi=magdataRad[0]
-	theta=magdataRad[2]
-	gravStan=9.806
-
-	accelDue2Grav=[0,0,0]
-	
-	accelDue2Grav[0]=
-	'''
-	
-
-
-	
-def integrate(logging):
+def IMU_get_data(logging):
 	
 	global timer
-	global acceldata
 	global timer_old
-	global accel_old
-	global accel_delta
 	global vel
-	global vel_old
 	global position
-#	global timer_delta
+	global timer_delta
 	global data_err
-
+	global theta
+	global gyrotheta
+	global acceldata
+	global gyrodata
+	global magdata
+	global accel_g
 
 	rawdata = ser2.readline()
+	timer = time.time()
 	data = rawdata.strip('\r\n').split(':') #reads in data, delimits around ':'
+	if (logging is True): log.store(data)#change to match all data
 	
 	try:
+		magdata = [float(data[x]) for x in [0,1,2]]
+		gyrodata = [float(data[x])/1400*90 for x in [3,4,5]]
 		#1632 is the conversion from miles/sec^2 to meters/sec^2
-		acceldata = [float(data[x])/1632 for x in [6,7,8]] #grab the third 3 value (Accelerometers)
-		# divide by 1632
+		acceldata = [float(data[x])/1632 for x in [6,7,8]]
+		pressuredata = float(data[9])
+
+		#data wrangling
+		if (gyrodata < .2):
+			gyrodata = .0
+		if (acceldata < .5):
+			acceldata = .0
+		magdata = [magdata[x]-magset[x] for x in range(0,3)]	
+
 	except(ValueError):
 		data_err = data_err+1
 		log.store('Error Count = '+str(data_err))
@@ -214,16 +115,30 @@ def integrate(logging):
 		data_err = data_err+1
 		log.store('Error Count = '+str(data_err))
 
-	if (logging is True): log.store(acceldata)
-
-	timer = time.time()
-	timer_delta = timer-timer_old
-	#acceldata[2] =acceldata[2]-9.806 
+	#gravity compensation
+	gx = math.sin(numpy.deg2rad(gyrodata[0]))*9.8
+	gy = math.sin(numpy.deg2rad(gyrodata[1]))*9.8
+	xyratio = math.cos(numpy.deg2rad(2*gyrodata[0]))+math.cos(numpy.deg2rad(2*gyrodata[1]))
+	gz = .707106*math.sqrt(math.fabs(xyratio))*9.8
+	accel_g = [gx,gy,gz]
+	acceldata = [acceldata[x] - accel_g[x] for x in range(0,3)]
+	timer_delta = round(timer-timer_old,2)
 	vel = [vel[x] + (acceldata[x] * timer_delta) for x in range(0,3)]
 	position = [position[x] + (vel[x] * timer_delta) for x in range(0,3)]
+	gyrotheta = [gyrotheta[x] + gyrodata[x] * timer_delta for x in range(0,3)]
 
 	timer_old = timer
-	return acceldata, vel, position, timer_delta
+
+def IMU_log_rawdata():
+	
+	rawdata = ser2.readline()
+	data = rawdata.strip('\r\n').split(':') #reads in data, delimits around ':'
+	try:
+		floatdata = [float(data[x]) for x in range(0,len(data))]
+		log.store(floatdata)
+	except(ValueError):
+		data_err = data_err+1
+		log.store('Error Count = '+str(data_err))
 
 serial_init()
 IMU_init()
@@ -231,18 +146,10 @@ timer_old =  time.time()
 timer = time.time()
 
 while 1:
-	acceldata, vel, position, timer_delta = integrate(False)
-	print [round(acceldata[x],3)for x in range(0,3)], [round(vel[x],3)for x in range(0,3)],[round(position[x],3)for x in range(0,3)], round(timer_delta,5)
-
-	#print [round(vel[x],3)for x in range(0,3)], [round(position[x],3) for x in range(0,3)]
-
-def IMU_get_data():
-	
-	rawdata = ser2.readline()
-	data = rawdata.strip('\r\n').split(':') #reads in data, delimits around ':'
-	try:
-		floatdata = [float(data[x]) for x in range(0,len(data)) ] #grab the first 3 values (magnetometer)
-		log.store(floatdata)
-	except(ValueError):
-		data_err = data_err+1
-		log.store('Error Count = '+str(data_err))
+	IMU_get_data(False)
+	#print magdata, gyrodata
+	#print [round(magdata[x],3)for x in range(0,3)], [round(gyrotheta[x],3)for x in range(0,3)]
+	print [round(gyrotheta[x],2)for x in range(0,3)]
+	#print [round(vel[x],3)for x in range(0,3)], [round(position[x],3)for x in range(0,3)]
+	#print round(timer_delta,5)
+	#print [round(acceldata[x],3)for x in range(0,3)]
