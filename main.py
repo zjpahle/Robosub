@@ -1,7 +1,7 @@
 #####################################
 #Robosub Competition Code
 #main.py
-#Revision 2.0
+#Revision 1.3
 #May 22nd, 2014
 #Maintained by: Zach Pahle
 #Contact Email: zjpahle@yahoo.com
@@ -15,32 +15,33 @@ import vision2
 
 log_motor = True
 
+
+#initialize vehicle
 robot.log.init()
 robot.motor.serial_init()
 robot.sensor.serial_init()
 robot.sensor.IMU_init()
 
-vision2.video
-'''
+#calibrate camera
+#################
+
+#################
+
+#wait to start
 #time.sleep(60)
-init_time = time.time()
-current_time = time.time()-init_time
-while(current_time<=(10)):
-	robot.sensor.IMU_get_data()
-	current_time = time.time()-init_time
-init_time = time.time()
-robot.motor.power(3,100, True)
-robot.motor.power(4,100, True)
-while(current_time<=(10)):
-	robot.sensor.IMU_get_data()
-	current_time = time.time()-init_time
-init_time = time.time()
-current_time = 0
-robot.motor.power(1,-100, True)
-robot.motor.power(2,-100, True)
-while(current_time<=(10)):
-	robot.sensor.IMU_get_data()
-	current_time = time.time()-init_time
-init_time = time.time()
-current_time = 0
-'''
+
+#find gate
+print vision2.find_gate()[0]
+if vision.find_gate()[0]>0:
+	while vision2.find_gate() > 1:
+		robot.motor.power(1, 100, True)
+		robot.motor.power(2, -100, True)
+	robot.motor.power(1, 0, True)
+	robot.motor.power(2, 0, True)
+
+if vision.find_gate()[0]<0:
+	while vision2.find_gate() < -1:
+		robot.motor.power(1, -100, True)
+		robot.motor.power(2, 100, True)
+	robot.motor.power(1, 0, True)
+	robot.motor.power(2, 0, True)
