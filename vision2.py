@@ -55,28 +55,32 @@ def find_center():
 		#finds orange blobs, passes two largest to be drawn on original
 		contour_flow = flow
 		contours = cv2.findContours(contour_flow, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[0]
-		cv2.drawContours(frame, contours, len(contours)-1, (0,255,0), 1)
-		cv2.drawContours(frame, contours, len(contours)-2, (0,255,0), 1)
+		cv2.drawContours(frame, contours, len(contours)-1, (0,255,0), 5)
+		cv2.drawContours(frame, contours, len(contours)-2, (0,255,0), 5)
 		
 		#find the center of the two blobs
+		centroid_x1 = 0
+		centroid_y1 = 0
+		centroid_x2 = 0
+		centroid_y2 = 0
 		if (len(contours)>1):
 			moment = cv2.moments(contours[-1])
 			if (moment['m00'] != 0):
 				centroid_x1 = int(moment['m10']/moment['m00'])
 				centroid_y1 = int(moment['m01']/moment['m00'])
 				#print centroid_x, centroid_y
-				cv2.circle(frame,(centroid_x1,centroid_y1), 5, (0,255,0), 1)
+				cv2.circle(frame,(centroid_x1,centroid_y1), 5, (0,255,0), 5)
 
 			moment = cv2.moments(contours[-2])
 			if (moment['m00'] != 0):
 				centroid_x2 = int(moment['m10']/moment['m00'])
 				centroid_y2 = int(moment['m01']/moment['m00'])
 				#print centroid_x, centroid_y
-				cv2.circle(frame,(centroid_x2,centroid_y2), 5, (0,255,0), 1)
+				cv2.circle(frame,(centroid_x2,centroid_y2), 5, (0,255,0), 5)
 
 			if centroid_x1:
 				gate_center = [(centroid_x1+centroid_x2)/2,(centroid_y1+centroid_y2)/2]
-				cv2.circle(frame,(gate_center[0],gate_center[1]), 5, (0,0,255), 1)
+				cv2.circle(frame,(gate_center[0],gate_center[1]), 5, (0,0,255), 5)
 				return [gate_center[x]-frame_center[x] for x in [0,1]]
 
 def test_stream():
@@ -91,8 +95,8 @@ def test_stream():
 			#threshold around color value (orange)
 			#orange_min = np.array([5, 100, 100], np.uint8)
 			#orange_max = np.array([10, 255, 255], np.uint8)
-			orange_min = np.array([0, 100, 100], np.uint8)
-			orange_max = np.array([15, 255, 255], np.uint8)
+			orange_min = np.array([0, 0, 0], np.uint8)
+			orange_max = np.array([30, 255, 255], np.uint8)
 
 			flow = cv2.inRange(flow, orange_min, orange_max)
 
@@ -106,8 +110,8 @@ def test_stream():
 			#print type(contour_flow)
 			#print type(cv2.findContours)
 			contours = cv2.findContours(contour_flow, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[0]
-			cv2.drawContours(frame, contours, len(contours)-1, (0,255,0), 1)
-			cv2.drawContours(frame, contours, len(contours)-2, (0,255,0), 1)
+			cv2.drawContours(frame, contours, len(contours)-1, (0,255,0), 5)
+			cv2.drawContours(frame, contours, len(contours)-2, (0,255,0), 5)
 			
 			#find the center of the two blobs
 			if (len(contours)>1):
@@ -116,18 +120,18 @@ def test_stream():
 					centroid_x1 = int(moment['m10']/moment['m00'])
 					centroid_y1 = int(moment['m01']/moment['m00'])
 					#print centroid_x, centroid_y
-					cv2.circle(frame,(centroid_x1,centroid_y1), 5, (0,255,0), 1)
+					cv2.circle(frame,(centroid_x1,centroid_y1), 5, (0,255,0), 5)
 
 				moment = cv2.moments(contours[-2])
 				if (moment['m00'] != 0):
 					centroid_x2 = int(moment['m10']/moment['m00'])
 					centroid_y2 = int(moment['m01']/moment['m00'])
 					#print centroid_x, centroid_y
-					cv2.circle(frame,(centroid_x2,centroid_y2), 5, (0,255,0), 1)
+					cv2.circle(frame,(centroid_x2,centroid_y2), 5, (0,255,0), 5)
 
 				if centroid_x1:
 					center = [(centroid_x1+centroid_x2)/2,(centroid_y1+centroid_y2)/2]
-					cv2.circle(frame,(center[0],center[1]), 5, (0,0,255), 1)
+					cv2.circle(frame,(center[0],center[1]), 5, (0,0,255), 5)
 
 			#epsilon = 0.1*cv2.arcLength(cnt,True)
 			#approx = cv2.approxPolyDP(cnt,epsilon,True)	
@@ -142,8 +146,8 @@ def test_stream():
 	cap.release()
 	cv2.destroyAllWindows()
 
-init_video()
+#init_video()
 #video()
-test_stream()
+#test_stream()
 #while 1:
 #	print find_center()

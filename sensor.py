@@ -32,7 +32,7 @@ position = [0,0,0]
 def serial_init():
 	global ser2
 	
-	IMUdevice = '/dev/ttyUSB0' #IMU
+	IMUdevice = '/dev/ttyUSB1' #IMU
 	ser2 = serial.Serial(IMUdevice, 115200, timeout=1)
 
 def IMU_init():		# sda-->a4	scl-->a5
@@ -51,10 +51,12 @@ def IMU_init():		# sda-->a4	scl-->a5
 		if rawdata[0].strip('-').isdigit(): #check to see if data is numerical
 			trooth = False
 			log.store('Successfully Initialized')
-	for x in range(0,300):	
+	
+	for x in range(0,250):	
 		IMU_get_data(False)
 		print gyrotheta
 	gyrotheta = [0,0,0]
+	
 	magset = magdata	
 
 def IMU_get_pressure():
@@ -139,7 +141,7 @@ def IMU_log_rawdata():
 	except(ValueError):
 		data_err = data_err+1
 		log.store('Error Count = '+str(data_err))
-
+'''
 serial_init()
 IMU_init()
 timer_old =  time.time()
@@ -149,7 +151,8 @@ while 1:
 	IMU_get_data(False)
 	#print magdata, gyrodata
 	#print [round(magdata[x],3)for x in range(0,3)], [round(gyrotheta[x],3)for x in range(0,3)]
-	print [round(gyrotheta[x],2)for x in range(0,3)]
+	print [round(acceldata[x],3)for x in range(0,3)]
 	#print [round(vel[x],3)for x in range(0,3)], [round(position[x],3)for x in range(0,3)]
 	#print round(timer_delta,5)
 	#print [round(acceldata[x],3)for x in range(0,3)]
+'''
